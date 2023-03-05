@@ -1,0 +1,6 @@
+/data
+/.vscode
+/venv
+/saved_models
+/test
+/__pycache__
