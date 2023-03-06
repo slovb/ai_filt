@@ -1,6 +1,7 @@
 from glob import glob
 import tensorflow as tf
-from main import raw_datasets, load_export_model
+from dataset import raw_datasets
+from export_model import load_export_model
 from decode import Logger, read
 
 if __name__ == '__main__':
@@ -23,9 +24,9 @@ if __name__ == '__main__':
         names.append(filename)
         inputs.append(read(filename=filename, logger=logger))
 
-    # 
-    export_int_model = load_export_model()
-    predicted_scores = export_int_model(inputs)
+    #
+    export_model = load_export_model()
+    predicted_scores = export_model(inputs)
     predicted_labels = get_string_labels(predicted_scores)
     for filename, label in zip(names, predicted_labels):
         print(filename, 'är', label.numpy())

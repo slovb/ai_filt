@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 
-def raw_datasets(train_dir, test_dir, seed=42):
+def raw_datasets(train_dir, test_dir, seed=41):
     batch_size = 32
     validation_split = 0.2
     raw_train_ds = tf.keras.utils.text_dataset_from_directory(

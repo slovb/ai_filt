@@ -12,12 +12,27 @@ def create_model(vocab_size, embedding_dim, num_labels):
         [
             tf.keras.layers.Embedding(vocab_size, embedding_dim, mask_zero=True),
             tf.keras.layers.Conv1D(
+                16, 3, padding="valid", activation="relu", strides=2
+            ),
+            tf.keras.layers.MaxPooling1D(),
+            tf.keras.layers.Conv1D(
                 64, 5, padding="valid", activation="relu", strides=2
             ),
+            tf.keras.layers.MaxPooling1D(),
+            tf.keras.layers.Conv1D(
+                64, 5, padding="valid", activation="relu", strides=2
+            ),
+            # tf.keras.layers.MaxPooling1D(),
             tf.keras.layers.GlobalMaxPooling1D(),
+            # tf.keras.layers.GlobalAveragePooling1D(),
+            tf.keras.layers.Flatten(),
+            tf.keras.layers.Dropout(rate=0.2),
+            tf.keras.layers.Dense(64, activation='relu'),
+            tf.keras.layers.Dropout(rate=0.2),
             tf.keras.layers.Dense(num_labels),
         ]
     )
+    print(model.summary())
     return model
 
 
@@ -48,14 +63,6 @@ if __name__ == "__main__":
         vocab_size=vocab_size,
         max_sequence_length=max_sequence_length,
     )
-
-    # text_batch, label_batch = next(iter(raw_train_ds))
-    # first_mail, first_label = text_batch[0], label_batch[0]
-    # print('mail', first_mail)
-    # print('label', first_label)
-
-    # print(int_vectorize_text(first_mail, first_label)[0])
-    # print(int_vectorize_layer.get_vocabulary()[51])
 
     # finalize the datasets
     train_ds = raw_train_ds.map(vectorize_text)
