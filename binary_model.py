@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-from dataset import raw_datasets
+from dataset import finalize_datasets, raw_datasets
 from export_model import create_export_model, compile_export_model, save_export_model
 from visualize import visualize_history
 from vectorization.binary_vectorization import binary_vectorization
@@ -37,18 +37,12 @@ if __name__ == "__main__":
     )
 
     # finalize the datasets
-    train_ds = raw_train_ds.map(vectorize_text)
-    val_ds = raw_val_ds.map(vectorize_text)
-    test_ds = raw_test_ds.map(vectorize_text)
-
-    autotune = tf.data.AUTOTUNE
-
-    def configure_dataset(dataset):
-        return dataset.cache().prefetch(buffer_size=autotune)
-
-    train_ds = configure_dataset(train_ds)
-    val_ds = configure_dataset(val_ds)
-    test_ds = configure_dataset(test_ds)
+    train_ds, val_ds, test_ds = finalize_datasets(
+        vectorize_text=vectorize_text,
+        raw_train_ds=raw_train_ds,
+        raw_val_ds=raw_val_ds,
+        raw_test_ds=raw_test_ds,
+    )
 
     # binary model
     model = create_binary_model()

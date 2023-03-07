@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-from dataset import raw_datasets
+from dataset import finalize_datasets, raw_datasets
 from export_model import (compile_export_model, create_export_model,
                           save_export_model)
 from vectorization.int_vectorization import int_vectorization
@@ -58,26 +58,20 @@ if __name__ == "__main__":
     # print(int_vectorize_layer.get_vocabulary()[51])
 
     # finalize the datasets
-    train_ds = raw_train_ds.map(vectorize_text)
-    val_ds = raw_val_ds.map(vectorize_text)
-    test_ds = raw_test_ds.map(vectorize_text)
-
-    autotune = tf.data.AUTOTUNE
-
-    def configure_dataset(dataset):
-        return dataset.cache().prefetch(buffer_size=autotune)
-
-    int_train_ds = configure_dataset(train_ds)
-    int_val_ds = configure_dataset(val_ds)
-    int_test_ds = configure_dataset(test_ds)
+    train_ds, val_ds, test_ds = finalize_datasets(
+        vectorize_text=vectorize_text,
+        raw_train_ds=raw_train_ds,
+        raw_val_ds=raw_val_ds,
+        raw_test_ds=raw_test_ds,
+    )
 
     # model
     model = create_model(vocab_size=vocab_size + 1, embedding_dim=64, num_labels=2)
     compile_model(model)
-    history = model.fit(int_train_ds, validation_data=int_val_ds, epochs=epochs)
+    history = model.fit(train_ds, validation_data=val_ds, epochs=epochs)
 
     # evaluate
-    loss, accuracy = model.evaluate(int_test_ds)
+    loss, accuracy = model.evaluate(test_ds)
     print("Model accuracy: {:2.2%}".format(accuracy))
 
     # export model
