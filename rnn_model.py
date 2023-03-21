@@ -15,7 +15,7 @@ def create_model(vocab_size, embedding_dim, num_labels, rnn_units):
             tf.keras.layers.LSTM(rnn_units, return_sequences=False),
             tf.keras.layers.Dropout(rate=0.2),
             tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.Dense(8, activation='relu'),
+            tf.keras.layers.Dense(16, activation='relu'),
             tf.keras.layers.Dense(num_labels),
         ]
     )
@@ -27,7 +27,7 @@ def compile_model(int_model):
     int_model.compile(
         loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
         # loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
-        optimizer=tf.optimizers.Adam(),
+        optimizer=tf.optimizers.Nadam(),
         metrics=["accuracy"],
     )
 
@@ -44,8 +44,8 @@ if __name__ == "__main__":
     train_text = raw_train_ds.map(lambda text, _: text)
 
     # vectorization layers
-    vocab_size = 1000
-    max_sequence_length = 25
+    vocab_size = 10000
+    max_sequence_length = 50
     vectorize_layer, vectorize_text = int_vectorization(
         train_text=train_text,
         vocab_size=vocab_size,
@@ -69,14 +69,14 @@ if __name__ == "__main__":
 
     # evaluate
     loss, accuracy = model.evaluate(test_ds)
-    print("Model accuracy: {:2.2%}".format(accuracy))
+    print("Model accuracy: {:.2%}".format(accuracy))
 
     # export model
     export_model = create_export_model(vectorize_layer=vectorize_layer, model=model)
     compile_export_model(export_model=export_model)
 
     loss, accuracy = export_model.evaluate(raw_test_ds)
-    print("Accuracy: {:2.2%}", format(accuracy))
+    print("Accuracy: {:.2%}", format(accuracy))
 
     save_export_model(export_model=export_model)
 

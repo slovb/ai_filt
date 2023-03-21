@@ -38,13 +38,13 @@ def create_model(vocab_size, embedding_dim, num_labels):
 def compile_model(int_model):
     int_model.compile(
         loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-        optimizer="adam",
+        optimizer=tf.keras.optimizers.Adam(learning_rate=0.0005),
         metrics=["accuracy"],
     )
 
 
 if __name__ == "__main__":
-    epochs = 100
+    epochs = 10
 
     # raw datasets
     train_dir = "data/train"

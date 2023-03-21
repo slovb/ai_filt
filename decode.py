@@ -4,6 +4,7 @@ from glob import glob
 from pathlib import Path
 
 import html2text
+import re
 
 
 class Logger:
@@ -50,6 +51,46 @@ class SpecificLogger:
         self.logger.message(name=self.name, message=message)
 
 
+def parse_html(html: str) -> str:
+    h = html2text.HTML2Text()
+    h.ignore_links = True
+    h.ignore_emphasis = True
+    h.ignore_images = True
+    h.ignore_tables = True
+    return h.handle(html)
+
+
+def convert_to_lower(match_obj):
+    if match_obj.group() is not None:
+        return match_obj.group().lower()
+
+
+def cleanup(content):
+    # lowercase
+    content = re.sub(r'[A-Z]', convert_to_lower, content)
+    content = re.sub(r'Å', 'å', content)
+    content = re.sub(r'Ä', 'ä', content)
+    content = re.sub(r'Ö', 'ö', content)
+
+    # anti email
+    content = re.sub(r'([A-Za-z0-9åäö]+[.-_])*[A-Za-z0-9åäö]+@[A-Za-z0-9-åäö]+(\.[A-Z|a-z]{2,})+', '', content)
+
+    # anti numbers
+    content = re.sub(r'[0-9]', '', content)
+
+    # anti symbols
+    content = re.sub(r'[-,:\+\(\)]', '', content)
+    content = re.sub(r'[\*\/]', ' ', content)
+    # content = re.sub(r'\.', '\n', content) # beware dotnet
+
+    # anti whitespace
+    content = re.sub(r'\t', ' ', content)
+    content = re.sub(r'  +', ' ', content)
+    content = re.sub(r'\n( *\n)+', '\n', content)
+
+    return content
+
+
 def convert_part(part, logger: SpecificLogger) -> str:
     if part.get_content_maintype() != "text":
         raise Exception("Unknown " + part.get_content_maintype())
@@ -64,7 +105,7 @@ def convert_part(part, logger: SpecificLogger) -> str:
         return ""
     content = payload.decode(charset)
     if part.get_content_type() == "text/html":
-        content = html2text.html2text(content)
+        content = parse_html(content)
     elif part.get_content_type() != "text/plain":
         raise Exception("more decode cases needed " + part.get_content_type())
     return content
@@ -102,7 +143,7 @@ def read(filename: str, logger: Logger) -> str:
         content = convert_message(
             message=message, logger=SpecificLogger(logger=logger, name=filename)
         )
-        return f"{subject}\n\n{content}"
+        return f"{cleanup(subject)}\n\n{cleanup(content)}"
 
 
 def convert(pathname: str, target: str, logger: Logger) -> None:
