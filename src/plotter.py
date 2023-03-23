@@ -1,7 +1,7 @@
 from glob import glob
 import matplotlib.pyplot as plt
-from dataset import raw_datasets
-from export_model import load_export_model
+from dataset.dataset import raw_datasets
+from model.export_model import load_export_model
 from decode import Logger, read
 import numpy as np
 
