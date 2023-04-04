@@ -83,10 +83,17 @@ def cleanup(content):
     content = re.sub(r'[\*\/]', ' ', content)
     # content = re.sub(r'\.', '\n', content) # beware dotnet
 
-    # anti whitespace
+    # anti tab
     content = re.sub(r'\t', ' ', content)
+    
+    # only approved characters
+    content = re.sub(r'[^a-zåäö \n]', '', content)
+    
+    # adjust whitespace
+    content = re.sub(r'^[ \n]+', '', content)
     content = re.sub(r'  +', ' ', content)
-    content = re.sub(r'\n( *\n)+', '\n', content)
+    content = re.sub(r' *\n *', '\n', content)
+    content = re.sub(r'\n\n+', '\n', content)
 
     return content
 
@@ -139,11 +146,12 @@ def read(filename: str, logger: Logger) -> str:
     """read a file and convert it to the text format"""
     with open(filename, "r") as f:
         message = email.message_from_file(f, policy=email.policy.default)
-        subject = message["subject"]
+        # subject = message["subject"]
         content = convert_message(
             message=message, logger=SpecificLogger(logger=logger, name=filename)
         )
-        return f"{cleanup(subject)}\n\n{cleanup(content)}"
+        return cleanup(content)
+        # return f"{cleanup(subject)}\n\n{cleanup(content)}"
 
 
 def convert(pathname: str, target: str, logger: Logger) -> None:

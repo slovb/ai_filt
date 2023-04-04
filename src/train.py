@@ -5,7 +5,7 @@ import visualize.visualize
 
 
 if __name__ == '__main__':
-    epochs = 50
+    epochs = 10
 
     # raw datasets
     train_dir = "data/train"
@@ -33,9 +33,9 @@ if __name__ == '__main__':
     )
 
     # model
-    import models.rnn_model as m
+    import models.dense_model as m
     model = m.create_model(
-        vocab_size=vocab_size + 1, embedding_dim=256, num_labels=2, rnn_units=128
+        vocab_size=vocab_size + 1, embedding_dim=256, num_labels=2  #, rnn_units=128
     )
     m.compile_model(model)
     history = model.fit(train_ds, validation_data=val_ds, epochs=epochs)

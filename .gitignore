@@ -3,4 +3,5 @@
 /venv
 /saved_models
 /test
+/secret
 __pycache__
